@@ -29,8 +29,7 @@ export async function GET(request: NextRequest) {
     where.ownerId = ownerId;
   }
   if (search) {
-    // SQLite LIKE is case-insensitive for ASCII characters by default
-    where.title = { contains: search.toLowerCase() };
+    where.title = { contains: search, mode: "insensitive" };
   }
 
   const deadlines = await prisma.deadline.findMany({
