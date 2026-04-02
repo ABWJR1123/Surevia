@@ -8,7 +8,7 @@ interface ParsedDocument {
 }
 
 // Keywords that map to categories
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
+export const CATEGORY_KEYWORDS: Record<string, string[]> = {
   insurance: [
     "insurance", "policy", "liability", "workers comp", "workers compensation",
     "bonding", "bond", "surety", "coverage", "underwriting", "premium",

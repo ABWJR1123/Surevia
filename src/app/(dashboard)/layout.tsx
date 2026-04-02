@@ -13,6 +13,8 @@ import {
   X,
   ShieldCheck,
   ChevronRight,
+  ClipboardCheck,
+  Settings,
 } from "lucide-react";
 
 interface User {
@@ -32,9 +34,11 @@ interface User {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/deadlines", label: "Deadlines", icon: CalendarClock },
+  { href: "/review", label: "Review Queue", icon: ClipboardCheck },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/team", label: "Team", icon: Users },
   { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 function getInitials(name: string): string {

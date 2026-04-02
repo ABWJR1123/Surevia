@@ -24,9 +24,12 @@ import {
   Download,
   Users,
   Sparkles,
+  ShieldCheck,
+  ShieldAlert,
+  Eye,
+  Lock,
 } from "lucide-react";
 
-// Matches Prisma User select shape from API
 interface OwnerData {
   id: string;
   firstName: string;
@@ -34,7 +37,6 @@ interface OwnerData {
   email: string;
 }
 
-// Matches Prisma Document shape
 interface DocumentData {
   id: string;
   filename: string;
@@ -42,10 +44,15 @@ interface DocumentData {
   mimeType: string;
   size: number;
   path: string;
+  encrypted: boolean;
+  scanned: boolean;
+  scanConfidence: string | null;
+  extractedTitle: string | null;
+  extractedCategory: string | null;
+  extractedExpDate: string | null;
   createdAt: string;
 }
 
-// Matches Prisma ActivityLog with included user
 interface ActivityData {
   id: string;
   action: string;
@@ -58,7 +65,6 @@ interface ActivityData {
   };
 }
 
-// Matches Prisma DeadlineWatcher with included user
 interface WatcherData {
   id: string;
   userId: string;
@@ -70,20 +76,26 @@ interface WatcherData {
   };
 }
 
-// Matches Prisma Reminder shape
 interface ReminderData {
   id: string;
   type: string;
+  channel: string;
   daysBefore: number;
   sentAt: string | null;
+  sentVia: string | null;
 }
 
-// Matches the full deadline GET response from /api/deadlines/[id]
 interface DeadlineData {
   id: string;
   title: string;
   category: string;
   status: string;
+  verificationStatus: string;
+  scanConfidence: string | null;
+  scanData: string | null;
+  verifiedAt: string | null;
+  verifiedBy: { id: string; firstName: string; lastName: string } | null;
+  reviewNote: string | null;
   expirationDate: string;
   issueDate: string | null;
   notes: string | null;
@@ -119,7 +131,7 @@ function initials(firstName: string, lastName: string): string {
 }
 
 function reminderLabel(daysBefore: number): string {
-  if (daysBefore === 0) return "Overdue";
+  if (daysBefore === 0) return "Day of expiration";
   if (daysBefore === 1) return "1 day before";
   return `${daysBefore} days before`;
 }
@@ -261,7 +273,6 @@ export default function DeadlineDetailPage() {
   useEffect(() => {
     async function load() {
       await fetchDeadline();
-      // Also load team members for watcher modal
       try {
         const res = await fetch("/api/team");
         if (res.ok) {
@@ -292,7 +303,6 @@ export default function DeadlineDetailPage() {
         body: JSON.stringify({ completionNote: note || null }),
       });
       if (res.ok) {
-        // Response is { completed, renewed } — refetch full detail instead
         await fetchDeadline();
       }
     } catch (err) {
@@ -346,7 +356,6 @@ export default function DeadlineDetailPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Analyze the file first
     try {
       const res = await fetch("/api/documents/analyze", {
         method: "POST",
@@ -363,10 +372,8 @@ export default function DeadlineDetailPage() {
         return;
       }
     } catch {
-      // If analysis fails, just upload directly
+      // fallback
     }
-
-    // Fallback: upload without analysis
     await uploadFile(file);
   }
 
@@ -396,7 +403,6 @@ export default function DeadlineDetailPage() {
   async function handleConfirmUpload(applyToDeadline: boolean) {
     if (!docSuggestion) return;
 
-    // If user wants to apply detected info to the deadline, update it first
     if (applyToDeadline && deadline) {
       const updates: Record<string, unknown> = {};
       if (docSuggestion.suggestedCategory && !deadline.category) {
@@ -413,7 +419,7 @@ export default function DeadlineDetailPage() {
             body: JSON.stringify(updates),
           });
         } catch {
-          // Non-critical — still upload the file
+          // Non-critical
         }
       }
     }
@@ -498,6 +504,7 @@ export default function DeadlineDetailPage() {
   const days = getDaysUntil(new Date(deadline.expirationDate));
   const urgency = getUrgencyLabel(days);
   const isTerminal = deadline.status === "completed" || deadline.status === "archived";
+  const isPreVerified = ["uploaded", "scanned", "needs_review"].includes(deadline.verificationStatus);
 
   const reminders: ReminderData[] = deadline.reminders || [];
   const displayReminders =
@@ -506,8 +513,10 @@ export default function DeadlineDetailPage() {
       : [30, 14, 7, 3, 1, 0].map((d, i) => ({
           id: `default-${i}`,
           type: "email",
+          channel: "email",
           daysBefore: d,
           sentAt: null,
+          sentVia: null,
         }));
 
   return (
@@ -544,6 +553,9 @@ export default function DeadlineDetailPage() {
             {deadline.title}
           </h1>
           <StatusBadge status={deadline.status} />
+          {deadline.verificationStatus !== "verified" && (
+            <StatusBadge status={deadline.verificationStatus} size="sm" />
+          )}
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
             {getCategoryLabel(deadline.category)}
           </span>
@@ -574,6 +586,78 @@ export default function DeadlineDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Verification Banner */}
+      {isPreVerified && (
+        <div className={`rounded-2xl border p-5 animate-slide-down ${
+          deadline.verificationStatus === "needs_review"
+            ? "bg-orange-50 border-orange-200"
+            : "bg-cyan-50 border-cyan-200"
+        }`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              deadline.verificationStatus === "needs_review"
+                ? "bg-orange-100"
+                : "bg-cyan-100"
+            }`}>
+              <ShieldAlert className={`h-4 w-4 ${
+                deadline.verificationStatus === "needs_review"
+                  ? "text-orange-600"
+                  : "text-cyan-600"
+              }`} />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-semibold ${
+                deadline.verificationStatus === "needs_review"
+                  ? "text-orange-900"
+                  : "text-cyan-900"
+              }`}>
+                {deadline.verificationStatus === "needs_review"
+                  ? "This item needs review before reminders activate"
+                  : deadline.verificationStatus === "scanned"
+                    ? "Document scanned — awaiting verification"
+                    : "Document uploaded — pending scan"}
+              </p>
+              {deadline.reviewNote && (
+                <p className="text-xs text-orange-700 mt-1">{deadline.reviewNote}</p>
+              )}
+              {deadline.scanConfidence && (
+                <p className="text-xs mt-1 text-slate-600">
+                  Scan confidence: <span className={`font-semibold ${
+                    deadline.scanConfidence === "high" ? "text-emerald-600" :
+                    deadline.scanConfidence === "medium" ? "text-amber-600" : "text-red-600"
+                  }`}>{deadline.scanConfidence}</span>
+                </p>
+              )}
+              <div className="flex items-center gap-2 mt-3">
+                <Link
+                  href="/review"
+                  className="inline-flex items-center gap-1.5 btn-primary text-xs px-3.5 py-1.5"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Go to Review Queue
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verified badge */}
+      {deadline.verificationStatus === "verified" && deadline.verifiedAt && (
+        <div className="bg-teal-50 border border-teal-100 rounded-2xl px-5 py-3 flex items-center gap-3 animate-fade-in">
+          <ShieldCheck className="w-5 h-5 text-teal-600 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-teal-800">
+              Verified
+              {deadline.verifiedBy && ` by ${deadline.verifiedBy.firstName} ${deadline.verifiedBy.lastName}`}
+            </p>
+            <p className="text-xs text-teal-600">
+              {format(new Date(deadline.verifiedAt), "MMM d, yyyy 'at' h:mm a")}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -764,12 +848,31 @@ export default function DeadlineDetailPage() {
                     <div className="flex items-center gap-3">
                       <FileText className="w-4 h-4 text-slate-400" />
                       <div>
-                        <p className="text-sm font-medium text-slate-900">
-                          {doc.originalName}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-slate-900">
+                            {doc.originalName}
+                          </p>
+                          {doc.encrypted && (
+                            <span title="Encrypted"><Lock className="w-3 h-3 text-teal-500" /></span>
+                          )}
+                          {doc.scanned && doc.scanConfidence && (
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                              doc.scanConfidence === "high"
+                                ? "bg-emerald-50 text-emerald-600"
+                                : doc.scanConfidence === "medium"
+                                  ? "bg-amber-50 text-amber-600"
+                                  : "bg-red-50 text-red-600"
+                            }`}>
+                              {doc.scanConfidence}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-slate-500">
                           {format(new Date(doc.createdAt), "MMM d, yyyy")} &middot;{" "}
                           {(doc.size / 1024).toFixed(0)} KB
+                          {doc.scanned && doc.extractedExpDate && (
+                            <> &middot; Detected exp: {doc.extractedExpDate}</>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -939,6 +1042,13 @@ export default function DeadlineDetailPage() {
                 Reminders
               </h2>
             </div>
+            {isPreVerified && (
+              <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2 mb-3">
+                <p className="text-xs text-orange-700">
+                  Reminders are paused until this item is verified.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               {displayReminders
                 .sort((a, b) => b.daysBefore - a.daysBefore)
@@ -951,14 +1061,29 @@ export default function DeadlineDetailPage() {
                       {reminderLabel(reminder.daysBefore)}
                     </span>
                     {reminder.sentAt ? (
-                      <span className="text-xs text-emerald-600 font-medium">
-                        Sent
+                      <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        {reminder.sentVia && reminder.sentVia !== "skipped_by_preference"
+                          ? `Sent (${reminder.sentVia})`
+                          : reminder.sentVia === "skipped_by_preference"
+                            ? "Skipped"
+                            : "Sent"}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-400">Pending</span>
+                      <span className={`text-xs ${isPreVerified ? "text-orange-400" : "text-slate-400"}`}>
+                        {isPreVerified ? "Paused" : "Pending"}
+                      </span>
                     )}
                   </div>
                 ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <Link
+                href="/settings"
+                className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+              >
+                Manage notification preferences →
+              </Link>
             </div>
           </div>
 

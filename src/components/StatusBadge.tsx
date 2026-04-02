@@ -47,6 +47,36 @@ const statusConfig: Record<
     border: "border-slate-200/60",
     label: "Archived",
   },
+  // Verification statuses
+  uploaded: {
+    bg: "bg-slate-50",
+    text: "text-slate-600",
+    border: "border-slate-200/60",
+    dot: "bg-slate-400",
+    label: "Uploaded",
+  },
+  scanned: {
+    bg: "bg-cyan-50",
+    text: "text-cyan-700",
+    border: "border-cyan-200/60",
+    dot: "bg-cyan-500",
+    label: "Scanned",
+  },
+  needs_review: {
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    border: "border-orange-200/60",
+    dot: "bg-orange-500",
+    pulse: true,
+    label: "Needs Review",
+  },
+  verified: {
+    bg: "bg-teal-50",
+    text: "text-teal-700",
+    border: "border-teal-200/60",
+    dot: "bg-teal-500",
+    label: "Verified",
+  },
 };
 
 export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {

@@ -1,6 +1,10 @@
 import { differenceInDays } from "date-fns";
 
+// Verification statuses that block reminder activation
+const PRE_VERIFIED_STATUSES = ["uploaded", "scanned", "needs_review"];
+
 export function computeStatus(expirationDate: Date, currentStatus: string): string {
+  // Terminal states
   if (currentStatus === "completed" || currentStatus === "archived") {
     return currentStatus;
   }
@@ -11,6 +15,28 @@ export function computeStatus(expirationDate: Date, currentStatus: string): stri
   if (daysUntil < 0) return "overdue";
   if (daysUntil <= 30) return "due_soon";
   return "active";
+}
+
+export function computeVerificationStatus(
+  scanConfidence: string | null,
+  hasDocuments: boolean
+): string {
+  if (!hasDocuments) return "verified"; // Manual entry — skip verification
+  if (!scanConfidence) return "uploaded";
+  if (scanConfidence === "high") return "verified";
+  if (scanConfidence === "medium") return "needs_review";
+  return "needs_review"; // low confidence
+}
+
+export function isPreVerified(verificationStatus: string): boolean {
+  return PRE_VERIFIED_STATUSES.includes(verificationStatus);
+}
+
+export function shouldSendReminders(verificationStatus: string, status: string): boolean {
+  // Only send reminders for verified items that are active/due_soon/overdue
+  if (isPreVerified(verificationStatus)) return false;
+  if (status === "completed" || status === "archived") return false;
+  return true;
 }
 
 export function getDaysUntil(expirationDate: Date): number {

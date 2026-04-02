@@ -18,6 +18,7 @@ export async function GET(
     where: { id, companyId: user.companyId },
     include: {
       owner: true,
+      verifiedBy: { select: { id: true, firstName: true, lastName: true } },
       watchers: {
         include: { user: true },
       },
@@ -33,6 +34,15 @@ export async function GET(
   if (!deadline) {
     return NextResponse.json({ error: "Deadline not found" }, { status: 404 });
   }
+
+  // Log access
+  await prisma.accessLog.create({
+    data: {
+      action: "deadline_viewed",
+      resource: `deadline:${deadline.id}`,
+      userId: user.id,
+    },
+  });
 
   return NextResponse.json(deadline);
 }
@@ -84,11 +94,13 @@ export async function PUT(
   if (handledById !== undefined) updateData.handledById = handledById || null;
   if (completionNote !== undefined) updateData.completionNote = completionNote;
 
-  // Recompute status based on expiration date
+  // Recompute status based on expiration date (only for verified items)
   const expDate = updateData.expirationDate
     ? (updateData.expirationDate as Date)
     : existing.expirationDate;
-  updateData.status = computeStatus(new Date(expDate), existing.status);
+  if (existing.verificationStatus === "verified") {
+    updateData.status = computeStatus(new Date(expDate), existing.status);
+  }
 
   const deadline = await prisma.deadline.update({
     where: { id },
