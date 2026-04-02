@@ -504,7 +504,7 @@ export default function DeadlineDetailPage() {
   const days = getDaysUntil(new Date(deadline.expirationDate));
   const urgency = getUrgencyLabel(days);
   const isTerminal = deadline.status === "completed" || deadline.status === "archived";
-  const isPreVerified = ["uploaded", "scanned", "needs_review"].includes(deadline.verificationStatus);
+  const isUnverified = ["uploaded", "scanned", "needs_review"].includes(deadline.verificationStatus);
 
   const reminders: ReminderData[] = deadline.reminders || [];
   const displayReminders =
@@ -588,7 +588,7 @@ export default function DeadlineDetailPage() {
       </div>
 
       {/* Verification Banner */}
-      {isPreVerified && (
+      {isUnverified && (
         <div className={`rounded-2xl border p-5 animate-slide-down ${
           deadline.verificationStatus === "needs_review"
             ? "bg-orange-50 border-orange-200"
@@ -1042,7 +1042,7 @@ export default function DeadlineDetailPage() {
                 Reminders
               </h2>
             </div>
-            {isPreVerified && (
+            {isUnverified && (
               <div className="bg-orange-50 border border-orange-100 rounded-lg px-3 py-2 mb-3">
                 <p className="text-xs text-orange-700">
                   Reminders are paused until this item is verified.
@@ -1070,8 +1070,8 @@ export default function DeadlineDetailPage() {
                             : "Sent"}
                       </span>
                     ) : (
-                      <span className={`text-xs ${isPreVerified ? "text-orange-400" : "text-slate-400"}`}>
-                        {isPreVerified ? "Paused" : "Pending"}
+                      <span className={`text-xs ${isUnverified ? "text-orange-400" : "text-slate-400"}`}>
+                        {isUnverified ? "Paused" : "Pending"}
                       </span>
                     )}
                   </div>

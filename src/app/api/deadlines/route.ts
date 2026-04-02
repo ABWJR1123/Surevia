@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
       companyId: user.companyId,
       locationId: locationId || null,
       status,
+      verificationStatus: "verified", // Manual entry — no document to verify
     },
     include: {
       owner: true,

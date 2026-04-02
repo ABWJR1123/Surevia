@@ -3,10 +3,12 @@ import { prisma } from "@/lib/db";
 import { encryptBuffer } from "@/lib/encryption";
 import { scanDocumentContent } from "@/lib/document-scanner";
 import { computeVerificationStatus } from "@/lib/deadline-status";
+import { sendEmailNotification } from "@/lib/notifications";
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { v4 as uuid } from "uuid";
 import path from "path";
+import { format } from "date-fns";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -158,6 +160,35 @@ export async function POST(request: NextRequest) {
         userId: user.id,
       },
     });
+
+    // Notify admins if scan confidence is low/medium (needs review)
+    if (scanResult && scanResult.confidence !== "high") {
+      const admins = await prisma.user.findMany({
+        where: { companyId: user.companyId, role: "admin" },
+      });
+
+      for (const admin of admins) {
+        await sendEmailNotification({
+          to: admin.email,
+          recipientName: `${admin.firstName} ${admin.lastName}`,
+          deadlineTitle: deadline.title,
+          deadlineId: deadline.id,
+          category: deadline.category,
+          expirationDate: format(new Date(deadline.expirationDate), "MMMM d, yyyy"),
+          daysUntil: 0,
+          type: "verification_needed",
+        });
+      }
+
+      await prisma.activityLog.create({
+        data: {
+          action: "verification_requested",
+          details: `Scan confidence: ${scanResult.confidence}. Admins notified for review.`,
+          deadlineId,
+          userId: user.id,
+        },
+      });
+    }
 
     return NextResponse.json({
       ...document,

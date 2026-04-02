@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
           ownerId: user.id,
           companyId: user.companyId,
           status,
+          verificationStatus: "verified", // Onboarding items — manual entry, no document to verify
         },
       });
 

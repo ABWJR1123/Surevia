@@ -73,6 +73,7 @@ export async function POST(
         companyId: deadline.companyId,
         locationId: deadline.locationId,
         status: newStatus,
+        verificationStatus: "verified", // Renewed from verified parent — no new document to verify
       },
       include: {
         owner: true,

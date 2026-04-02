@@ -1,7 +1,7 @@
 import { differenceInDays } from "date-fns";
 
-// Verification statuses that block reminder activation
-const PRE_VERIFIED_STATUSES = ["uploaded", "scanned", "needs_review"];
+// Statuses where data is not yet verified — reminders are blocked
+const UNVERIFIED_STATUSES = ["uploaded", "scanned", "needs_review"];
 
 export function computeStatus(expirationDate: Date, currentStatus: string): string {
   // Terminal states
@@ -28,13 +28,13 @@ export function computeVerificationStatus(
   return "needs_review"; // low confidence
 }
 
-export function isPreVerified(verificationStatus: string): boolean {
-  return PRE_VERIFIED_STATUSES.includes(verificationStatus);
+export function isUnverified(verificationStatus: string): boolean {
+  return UNVERIFIED_STATUSES.includes(verificationStatus);
 }
 
 export function shouldSendReminders(verificationStatus: string, status: string): boolean {
   // Only send reminders for verified items that are active/due_soon/overdue
-  if (isPreVerified(verificationStatus)) return false;
+  if (isUnverified(verificationStatus)) return false;
   if (status === "completed" || status === "archived") return false;
   return true;
 }
