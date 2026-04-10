@@ -1,4 +1,4 @@
-import { getAuthUser } from "@/lib/auth";
+import { getAuthUser, canWrite, SAFE_USER_SELECT } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { computeStatus } from "@/lib/deadline-status";
@@ -17,14 +17,14 @@ export async function GET(
   const deadline = await prisma.deadline.findUnique({
     where: { id, companyId: user.companyId },
     include: {
-      owner: true,
+      owner: { select: SAFE_USER_SELECT },
       verifiedBy: { select: { id: true, firstName: true, lastName: true } },
       watchers: {
-        include: { user: true },
+        include: { user: { select: SAFE_USER_SELECT } },
       },
       documents: true,
       activityLogs: {
-        include: { user: true },
+        include: { user: { select: { id: true, firstName: true, lastName: true } } },
         orderBy: { createdAt: "desc" },
       },
       reminders: true,
@@ -57,6 +57,14 @@ export async function PUT(
   }
 
   const { id } = await params;
+
+  // Viewers cannot update deadlines
+  if (!canWrite(user)) {
+    return NextResponse.json(
+      { error: "You don't have permission to update deadlines" },
+      { status: 403 }
+    );
+  }
 
   const existing = await prisma.deadline.findUnique({
     where: { id, companyId: user.companyId },
@@ -106,7 +114,7 @@ export async function PUT(
     where: { id },
     data: updateData,
     include: {
-      owner: true,
+      owner: { select: SAFE_USER_SELECT },
     },
   });
 

@@ -1,4 +1,4 @@
-import { getAuthUser } from "@/lib/auth";
+import { getAuthUser, canWrite } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { encryptBuffer } from "@/lib/encryption";
 import { scanDocumentContent } from "@/lib/document-scanner";
@@ -28,6 +28,14 @@ export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Viewers cannot upload documents
+  if (!canWrite(user)) {
+    return NextResponse.json(
+      { error: "You don't have permission to upload documents" },
+      { status: 403 }
+    );
   }
 
   try {

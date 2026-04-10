@@ -1,4 +1,4 @@
-import { getAuthUser } from "@/lib/auth";
+import { getAuthUser, canWrite, SAFE_USER_SELECT } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { computeStatus } from "@/lib/deadline-status";
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   const deadlines = await prisma.deadline.findMany({
     where,
     include: {
-      owner: true,
+      owner: { select: SAFE_USER_SELECT },
     },
     orderBy: {
       expirationDate: "asc",
@@ -49,6 +49,14 @@ export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Viewers cannot create deadlines
+  if (!canWrite(user)) {
+    return NextResponse.json(
+      { error: "You don't have permission to create deadlines" },
+      { status: 403 }
+    );
   }
 
   const body = await request.json();
@@ -97,7 +105,7 @@ export async function POST(request: NextRequest) {
       verificationStatus: "verified", // Manual entry — no document to verify
     },
     include: {
-      owner: true,
+      owner: { select: SAFE_USER_SELECT },
     },
   });
 

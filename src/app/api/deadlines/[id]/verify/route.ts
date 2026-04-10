@@ -1,4 +1,4 @@
-import { getAuthUser } from "@/lib/auth";
+import { getAuthUser, SAFE_USER_SELECT } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { computeStatus } from "@/lib/deadline-status";
 import { NextRequest, NextResponse } from "next/server";
@@ -60,7 +60,7 @@ export async function POST(
     const updated = await prisma.deadline.update({
       where: { id },
       data: updateData,
-      include: { owner: true },
+      include: { owner: { select: SAFE_USER_SELECT } },
     });
 
     await prisma.activityLog.create({
@@ -82,7 +82,7 @@ export async function POST(
         verificationStatus: "needs_review",
         reviewNote: reviewNote || "Flagged for review",
       },
-      include: { owner: true },
+      include: { owner: { select: SAFE_USER_SELECT } },
     });
 
     await prisma.activityLog.create({
@@ -104,7 +104,7 @@ export async function POST(
         verificationStatus: "needs_review",
         reviewNote: reviewNote || "Data rejected — requires re-upload or manual correction",
       },
-      include: { owner: true },
+      include: { owner: { select: SAFE_USER_SELECT } },
     });
 
     await prisma.activityLog.create({

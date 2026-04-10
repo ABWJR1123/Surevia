@@ -33,8 +33,8 @@ function getRoleBadgeClasses(role: string): string {
   switch (role) {
     case "admin":
       return "bg-teal-100 text-teal-700";
-    case "manager":
-      return "bg-amber-100 text-amber-700";
+    case "viewer":
+      return "bg-purple-100 text-purple-700";
     default:
       return "bg-slate-100 text-slate-700";
   }
@@ -189,8 +189,8 @@ function MemberFormModal({
               onChange={(v) => setForm((f) => ({ ...f, role: v }))}
               options={[
                 { value: "admin", label: "Admin", description: "Full access to all features" },
-                { value: "manager", label: "Manager", description: "Manage deadlines and team" },
-                { value: "member", label: "Member", description: "View and manage own deadlines" },
+                { value: "member", label: "Member", description: "Create and manage deadlines" },
+                { value: "viewer", label: "Viewer (Guest)", description: "Read-only access — cannot create or edit" },
               ]}
             />
           </div>
