@@ -891,6 +891,13 @@ export default function DeadlineDetailPage() {
                 No documents attached yet.
               </p>
             )}
+
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+              <Lock className="w-3 h-3 text-teal-500 flex-shrink-0" />
+              <p className="text-[11px] text-slate-400">
+                All documents are encrypted with AES-256 and accessible only to your company.
+              </p>
+            </div>
           </div>
 
           {/* Activity Log Card */}

@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, ArrowRight } from "lucide-react";
+import { ShieldCheck, ArrowRight, Lock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -122,6 +122,13 @@ export default function LoginPage() {
             </>
           )}
         </button>
+
+        <div className="flex items-center gap-2 mt-4 px-1 animate-fade-in" style={{ animationDelay: "350ms" }}>
+          <Lock className="h-3.5 w-3.5 text-teal-600 flex-shrink-0" />
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Secured with encrypted sessions. Your credentials and data are fully protected.
+          </p>
+        </div>
       </form>
 
       <p className="text-center text-sm text-slate-500 mt-8 animate-fade-in" style={{ animationDelay: "400ms" }}>

@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, ArrowRight, CheckCircle2, Lock } from "lucide-react";
 import { BUSINESS_TYPES } from "@/lib/business-types";
 import Select from "@/components/Select";
 
@@ -220,6 +220,13 @@ export default function RegisterPage() {
             </>
           )}
         </button>
+
+        <div className="flex items-center gap-2 mt-4 px-1 animate-fade-in" style={{ animationDelay: "500ms" }}>
+          <Lock className="h-3.5 w-3.5 text-teal-600 flex-shrink-0" />
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Your data is protected with AES-256 encryption and is only accessible to authorized users within your company. We never share your information externally.
+          </p>
+        </div>
       </form>
 
       <p className="text-center text-sm text-slate-500 mt-8 animate-fade-in" style={{ animationDelay: "600ms" }}>

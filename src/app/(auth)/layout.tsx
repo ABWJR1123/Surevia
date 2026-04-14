@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Lock, Eye, Server } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -39,16 +39,31 @@ export default function AuthLayout({
 
           <div className="stagger-children">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold">1</div>
-              <span className="text-sm text-teal-100">Select your trade, get instant compliance checklists</span>
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <Lock className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-sm text-white font-medium">AES-256 Encrypted Storage</span>
+                <p className="text-xs text-teal-200/60">Every document is encrypted at rest</p>
+              </div>
             </div>
             <div className="flex items-center gap-3 mt-4">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold">2</div>
-              <span className="text-sm text-teal-100">Upload documents and auto-detect expiration dates</span>
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <Eye className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-sm text-white font-medium">Company-Only Access</span>
+                <p className="text-xs text-teal-200/60">Your data is never shared externally</p>
+              </div>
             </div>
             <div className="flex items-center gap-3 mt-4">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold">3</div>
-              <span className="text-sm text-teal-100">Get reminders before anything expires</span>
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <Server className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-sm text-white font-medium">Full Audit Trail</span>
+                <p className="text-xs text-teal-200/60">Every access and change is logged</p>
+              </div>
             </div>
           </div>
         </div>

@@ -9,6 +9,9 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
+  Lock,
+  Eye,
+  Server,
 } from "lucide-react";
 
 interface Preferences {
@@ -241,17 +244,54 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Privacy Notice */}
+      {/* Privacy & Security */}
       <div className="bg-white rounded-2xl shadow-card border border-slate-100 p-6 animate-fade-in" style={{ animationDelay: "200ms" }}>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-5">
           <Shield className="w-5 h-5 text-teal-600" />
           <h2 className="text-base font-semibold text-slate-900">Privacy & Security</h2>
         </div>
+
+        <div className="space-y-3 mb-5">
+          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Lock className="w-4 h-4 text-teal-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-900">AES-256 Encryption</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Every document you upload is encrypted using military-grade AES-256-GCM encryption before it is stored. Files are unreadable without your company's unique encryption key.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Eye className="w-4 h-4 text-teal-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-900">Strict Company Isolation</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Your data is completely isolated. No one outside your company can view, access, or download your documents and compliance records. There is no external data sharing of any kind.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Server className="w-4 h-4 text-teal-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-900">Complete Audit Trail</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Every document view, download, upload, and change is logged with timestamps and user attribution. You always know who accessed what and when.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
           <p className="text-sm text-teal-800 leading-relaxed">
-            Documents and data remain private and are only accessible to authorized users within your company.
-            All uploaded documents are encrypted at rest. If needed, data may be reviewed only to verify accuracy
-            and prevent false alerts. Access to documents and deadlines is logged for audit purposes.
+            Documents and data remain private and are only accessible to authorized users within your company. If needed, data may be reviewed internally only to verify accuracy and prevent false alerts. Your information is never sold, shared, or made accessible to third parties.
           </p>
         </div>
       </div>
