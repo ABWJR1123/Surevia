@@ -25,6 +25,11 @@ export function isAdmin(user: AuthUser): boolean {
   return user.role === "admin";
 }
 
+// Platform-wide super admin — manages all companies and all users
+export function isSuperAdmin(user: AuthUser): boolean {
+  return user.role === "superadmin";
+}
+
 // Safe user fields to include in API responses (excludes passwordHash)
 export const SAFE_USER_SELECT = {
   id: true,

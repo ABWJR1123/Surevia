@@ -12,7 +12,13 @@ export default function Home() {
       try {
         const res = await fetch("/api/auth/me");
         if (res.ok) {
-          router.replace("/dashboard");
+          const data = await res.json();
+          const userData = data.user ?? data;
+          if (userData.role === "superadmin") {
+            router.replace("/platform");
+          } else {
+            router.replace("/dashboard");
+          }
         } else {
           router.replace("/login");
         }

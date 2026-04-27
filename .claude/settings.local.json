@@ -3,7 +3,14 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(npx prisma:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(npx tsc *)",
+      "Bash(npm uninstall *)"
+    ],
+    "additionalDirectories": [
+      "e:\\Work\\Task\\Anthony_project\\Surevia\\src\\app\\api\\admin\\users\\[id]",
+      "e:\\Work\\Task\\Anthony_project\\Surevia\\src\\app\\api\\platform\\users",
+      "e:\\Work\\Task\\Anthony_project\\Surevia\\src\\app\\(platform)\\platform\\companies"
     ]
   }
 }

@@ -31,7 +31,12 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
+      // Superadmins go to the platform area
+      if (data.user?.role === "superadmin") {
+        router.push("/platform");
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       setError("Something went wrong. Please try again later.");
     } finally {
